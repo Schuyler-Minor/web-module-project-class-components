@@ -1,6 +1,7 @@
 import React from "react";
 import TodoList from "./TodoList";
 import Form from "./Form";
+import axios from "axios";
 
 export default class App extends React.Component {
   constructor() {
@@ -19,6 +20,19 @@ export default class App extends React.Component {
         },
       ],
     };
+  }
+
+  componentDidMount() {
+    console.log("👉 component did mount");
+    axios
+      .get("http://localhost:9000/api/todos")
+      .then((res) => {
+        console.log(res);
+        this.setState({ ...this.state, todos: res.data.data });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   handleAdd = (name) => {

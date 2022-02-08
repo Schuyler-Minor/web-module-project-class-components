@@ -7,6 +7,7 @@ export default class Form extends React.Component {
       input: "",
     };
   }
+
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.handleAdd(this.state.input);
