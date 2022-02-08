@@ -23,11 +23,9 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    console.log("👉 component did mount");
     axios
       .get("http://localhost:9000/api/todos")
       .then((res) => {
-        console.log(res);
         this.setState({ ...this.state, todos: res.data.data });
       })
       .catch((err) => {
@@ -41,10 +39,18 @@ export default class App extends React.Component {
       id: Date.now(),
       completed: false,
     };
-    this.setState({
-      ...this.state,
-      todos: [...this.state.todos, newTodo],
-    });
+    axios
+      .post("http://localhost:9000/api/todos", newTodo)
+      .then((res) => {
+        console.log(res.data);
+        this.setState({
+          ...this.state,
+          todos: [...this.state.todos, res.data.data],
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   handleClear = () => {
