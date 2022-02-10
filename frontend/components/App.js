@@ -3,90 +3,125 @@ import TodoList from "./TodoList";
 import Form from "./Form";
 import axios from "axios";
 
+const URL = " http://localhost:9000/api/todos";
+
 export default class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      todos: [
-        {
-          name: "Organize Garage",
-          id: 1528817077286,
-          completed: false,
-        },
-        {
-          name: "Bake Cookies",
-          id: 1528817084358,
-          completed: false,
-        },
-      ],
-    };
-  }
+  state = {
+    todos: [],
+    error: "",
+    todoNameInput: "",
+    displayCompleted: true,
+  };
+
+  handleChange = (event) => {
+    const { value } = event.target;
+    this.setState({ ...this.state, todoNameInput: value });
+  };
 
   componentDidMount() {
+    this.fetchAllTodos();
+  }
+
+  fetchAllTodos = () => {
     axios
-      .get("http://localhost:9000/api/todos")
+      .get(URL)
       .then((res) => {
         this.setState({ ...this.state, todos: res.data.data });
       })
       .catch((err) => {
-        console.log(err);
+        this.setState({ ...this.state, error: err.res.data.message });
       });
-  }
+  };
 
-  handleAdd = (name) => {
-    const newTodo = {
-      name: name,
-      id: Date.now(),
-      completed: false,
-    };
+  resetForm = () => this.setState({ ...this.state, todoNameInput: "" });
+  setAxiosResponseError = (err) =>
+    this.setState({ ...this.state, error: err.res.data.message });
+  postNewTodo = () => {
     axios
-      .post("http://localhost:9000/api/todos", newTodo)
+      .post(URL, { name: this.state.todoNameInput })
       .then((res) => {
-        console.log(res.data);
         this.setState({
           ...this.state,
-          todos: [...this.state.todos, res.data.data],
+          todos: this.state.todos.concat(res.data.data),
         });
+        this.resetForm();
       })
       .catch((err) => {
-        console.log(err);
+        this.setState({ ...this.state, error: err.res.data.message });
       });
   };
 
-  handleClear = () => {
-    this.setState({
-      ...this.state,
-      todos: this.state.todos.filter((todo) => {
-        return todo.completed === false;
-      }),
-    });
+  handleSubmit = (event) => {
+    event.preventDefault();
+    this.postNewTodo();
   };
 
-  handleToggle = (clickedId) => {
-    this.setState({
-      ...this.state,
-      todos: this.state.todos.map((todo) => {
-        if (todo.id === clickedId) {
-          return {
-            ...todo,
-            completed: !todo.completed,
-          };
-        } else {
-          return todo;
-        }
-      }),
-    });
+  // handleAdd = (name) => {
+  //
+  //   axios
+  //     .post(URL, newTodo)
+  //     .then((res) => {
+  //       this.setState({
+  //         ...this.state,
+  //         todos: [...this.state.todos, res.data.data],
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // };
+
+  // handleClear = (id) => (event) => {
+  //   axios.delete(`${URL}/${id}`).then((res) => {
+  //     debugger;
+  //     this.setState({
+  //       ...this.state,
+  //       todos: this.state.todos.filter((todo) => {
+  //         return todo.id !== id;
+  //       }),
+  //     });
+  //   });
+  // };
+
+  handleToggle = (id) => (event) => {
+    axios
+      .patch(`${URL}/${id}`)
+      .then((res) => {
+        this.setState({
+          ...this.state,
+          todos: this.state.todos.map((td) => {
+            if (td.id !== id) return td;
+            return res.data.data;
+          }),
+        });
+      })
+      .catch(this.setAxiosResponseError);
   };
 
+  toggleDisplayCompleteds = () => {
+    this.setState({
+      ...this.state,
+      displayCompleted: !this.state.displayCompleted,
+    });
+  };
   render() {
     const { todos } = this.state;
 
     return (
       <div>
-        <h2>Todo</h2>
-        <TodoList handleToggle={this.handleToggle} todos={todos} />
-        <Form handleAdd={this.handleAdd} />
-        <button onClick={this.handleClear}>Clear</button>
+        <div id="error">Error: {this.state.error}</div>
+        <TodoList
+          todos={this.state.todos}
+          displayCompleted={this.state.displayCompleted}
+          handleToggle={this.handleToggle}
+        />
+        <Form
+          handleSubmit={this.handleSubmit}
+          handleChange={this.handleChange}
+          toggleDisplayCompleteds={this.toggleDisplayCompleteds}
+          todoNameInput={this.state.todoNameInput}
+          displayCompleted={this.state.displayCompleted}
+        />
       </div>
     );
   }
