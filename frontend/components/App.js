@@ -56,33 +56,6 @@ export default class App extends React.Component {
     this.postNewTodo();
   };
 
-  // handleAdd = (name) => {
-  //
-  //   axios
-  //     .post(URL, newTodo)
-  //     .then((res) => {
-  //       this.setState({
-  //         ...this.state,
-  //         todos: [...this.state.todos, res.data.data],
-  //       });
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // };
-
-  // handleClear = (id) => (event) => {
-  //   axios.delete(`${URL}/${id}`).then((res) => {
-  //     debugger;
-  //     this.setState({
-  //       ...this.state,
-  //       todos: this.state.todos.filter((todo) => {
-  //         return todo.id !== id;
-  //       }),
-  //     });
-  //   });
-  // };
-
   handleToggle = (id) => (event) => {
     axios
       .patch(`${URL}/${id}`)
